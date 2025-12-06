@@ -1,0 +1,2 @@
+jamo_accuracy,baseline_accuracy,improvement,cho_accuracy,jung_accuracy,jong_accuracy,cho_best_params,jung_best_params,jong_best_params
+0.7675223214285715,0.8467,-0.07917767857142854,0.8863095238095238,0.8942708333333333,0.9139136904761904,{'n_neighbors': 7},{'n_neighbors': 7},{'n_neighbors': 5}

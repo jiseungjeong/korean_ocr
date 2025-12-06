@@ -1,0 +1,2 @@
+Method,Cho_Accuracy,Jung_Accuracy,Char_Accuracy,Baseline_Accuracy,Improvement,Total_Samples,Failed_Segmentations,Missing_Mappings
+Jamo-based Hierarchical Classification,0.176,0.10422222222222222,0.025111111111111112,0.8467,-0.8215888888888889,4500,0,0

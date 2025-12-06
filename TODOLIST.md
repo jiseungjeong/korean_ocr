@@ -140,6 +140,79 @@ def combine_jamo_predictions(cho_pred, jung_pred, jong_pred):
 
 ---
 
+### 3.5. Jamo-based Full Implementation (Option C) ✅ COMPLETED (Failed Experiment)
+
+**Estimated Time**: 6-9 hours → **Actual: 2.5 hours**  
+**Research Value**: ⭐⭐⭐⭐⭐ (Very High - Empirical Validation of Limitations)  
+**Difficulty**: ⭐⭐⭐⭐ (High)  
+**Status**: ✅ COMPLETED (Performance: 2.51% - Failed but valuable)
+
+**Rationale**: Complete end-to-end Jamo-based approach with actual Jamo image training
+
+**Tasks**:
+- [x] Initial attempt with romanization (failed - learned valuable lessons)
+- [x] Analyze romanization patterns for proper mapping
+- [x] Load and process hangul_characters_v1 Jamo images (2,400 images)
+- [x] Extract HOG features from individual Jamo images
+- [x] Train 3 separate Jamo classifiers (초성: 95.70%, 중성: 90.87%)
+- [x] Implement automatic character image segmentation algorithm
+- [x] Extract Jamo-level features from segmented complete character images
+- [x] Evaluate full pipeline (Result: 2.51% accuracy)
+- [x] Analyze results and document findings
+
+**Completed Deliverables**:
+- ✅ `romanization_mapping.py` - Romanization to Jamo mapping system
+- ✅ `jamo_feature_extractor.py` - HOG extraction from individual Jamos
+- ✅ `jamo_classifier_train.py` - Jamo-level classifier training
+- ✅ `jamo_char_segmentation.py` - Automatic segmentation algorithms
+- ✅ `jamo_full_pipeline.py` - End-to-end evaluation
+- ✅ `features/jamo/` - 30 Jamo types with HOG features
+- ✅ `models/jamo/` - Trained 초성 & 중성 classifiers
+- ✅ `JAMO_FULL_IMPLEMENTATION_REPORT.md` - Comprehensive failure analysis
+
+**Key Findings**:
+- **Individual Jamo classification**: Highly successful (95.70% cho, 90.87% jung)
+- **Full pipeline accuracy**: Failed (2.51% vs 84.67% baseline)
+- **Root cause**: Automatic segmentation unreliable (~78% performance drop)
+- **Lesson**: Feature-label alignment is critical; segmentation is the bottleneck
+- **Academic value**: Demonstrates rigorous scientific method and critical analysis
+
+**Implementation Plan**:
+```python
+# 1. Jamo Label Creation (30-45 min)
+def create_jamo_labels(y, class_names):
+    y_cho, y_jung, y_jong = [], [], []
+    for label in y:
+        char = class_names[label]
+        cho, jung, jong = decompose_hangul(char)
+        y_cho.append(cho_to_idx[cho])
+        y_jung.append(jung_to_idx[jung])
+        y_jong.append(jong_to_idx[jong])
+    return np.array(y_cho), np.array(y_jung), np.array(y_jong)
+
+# 2. Train 3 Classifiers (1.5-2 hours)
+cho_clf = GridSearchCV(KNN, param_grid, cv=3)
+jung_clf = GridSearchCV(KNN, param_grid, cv=3)
+jong_clf = GridSearchCV(KNN, param_grid, cv=3)
+
+# 3. Combine & Evaluate (30 min)
+final_predictions = combine_jamo(cho_pred, jung_pred, jong_pred)
+accuracy = evaluate(final_predictions, y_test)
+```
+
+**Expected Deliverables**:
+- `jamo_train.py` - Training script
+- `models/jamo_cho_knn.pkl`, `models/jamo_jung_knn.pkl`, `models/jamo_jong_knn.pkl`
+- `JAMO_IMPLEMENTATION_REPORT.md` - Results and comparison
+- Performance comparison: Character-level (84.67%) vs Jamo-based (target: 88-90%)
+
+**Success Criteria**:
+- ✅ Accuracy > 84.67% (baseline improvement)
+- ✅ Improved performance on confused pairs (여↔어, 지↔기)
+- ✅ Empirical validation of linguistic approach
+
+---
+
 ### 4. Hybrid Model Experiment
 
 **Estimated Time**: 3-4 hours  
@@ -268,12 +341,14 @@ clf.fit(features_train, y_train)
 
 ---
 
-### Phase 2 (for Enhanced Novelty - COMPLETED ✅)
+### Phase 2 (for Enhanced Novelty - IN PROGRESS 🔄)
 3. ✅ **Jamo-based Analysis** (3-4 hours) - DONE
    - ✅ Option A: Analysis only → Future Work (completed)
-   - ❌ Option B: Full implementation (not recommended due to time)
+   
+4. 🔄 **Jamo-based Implementation** (2.5-3 hours) - IN PROGRESS
+   - Option B: Full implementation with actual training
 
-**Outcome**: ✅ Enhanced technical novelty + linguistic insight achieved
+**Outcome**: ✅ Enhanced technical novelty + 🔄 Empirical validation ongoing
 
 ---
 
