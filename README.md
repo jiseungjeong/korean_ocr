@@ -306,7 +306,7 @@ Dataset license follows Kaggle original terms.
 
 ## Contributors
 
-**Team: Group 14**  
+**Team: Group 2**  
 **Course:** CSE36301 Machine Learning, UNIST  
 **Semester:** 2025 Fall
 
