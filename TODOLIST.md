@@ -1,8 +1,8 @@
-# Project TODO List 
+# Project TODO List - Additional Experiments
 
-### What Requires
+### Research Goals
 
-**Key Difference**: "Research insights + thorough analysis of why methods fail/succeed"
+**Focus**: Thorough analysis of why methods fail/succeed and how to improve the system
 
 Not just performance numbers, but understanding of:
 - WHY the model fails on specific characters
@@ -11,12 +11,12 @@ Not just performance numbers, but understanding of:
 
 ---
 
-## Priority 1: MUST DO for A+ (High Impact, Low Effort)
+## Priority 1: Essential Analysis (High Impact, Low Effort)
 
 ### 1. Confusion Matrix & Error Analysis
 
 **Estimated Time**: 2-3 hours  
-**Impact on Grade**: ⭐⭐⭐⭐⭐ (Critical)  
+**Research Value**: ⭐⭐⭐⭐⭐ (Critical)  
 **Difficulty**: ⭐ (Easy)
 
 **Tasks**:
@@ -40,7 +40,7 @@ Not just performance numbers, but understanding of:
 ### 2. Korean Character Structure Analysis
 
 **Estimated Time**: 1-2 hours  
-**Impact on Grade**: ⭐⭐⭐⭐ (Very High)  
+**Research Value**: ⭐⭐⭐⭐ (Very High)  
 **Difficulty**: ⭐ (Easy)
 
 **Tasks**:
@@ -61,15 +61,15 @@ Not just performance numbers, but understanding of:
 
 ---
 
-## Priority 2: HIGHLY RECOMMENDED (High Impact, Medium Effort)
+## Priority 2: Advanced Experiments (High Impact, Medium Effort)
 
 ### 3. Hybrid Model Experiment
 
 **Estimated Time**: 3-4 hours  
-**Impact on Grade**: ⭐⭐⭐⭐⭐ (Strongest A+ contribution)  
+**Research Value**: ⭐⭐⭐⭐⭐ (Very High)  
 **Difficulty**: ⭐⭐⭐ (Medium)
 
-**Rationale**: Demonstrates research depth by exploring "best of both worlds"
+**Rationale**: Explore combining deep features with classical ML for improved performance
 
 **Tasks**:
 - [ ] Load pretrained Xception/ResNet model
@@ -101,7 +101,7 @@ clf.fit(features_train, y_train)
 - Hybrid (CNN features + ML): ~90-92%
 - Pure CNN (Xception): 97.62%
 
-**Key Message**: Hybrid approach bridges 50% of the performance gap while maintaining ML interpretability
+**Key Message**: Hybrid approach bridges the performance gap while maintaining ML interpretability
 
 **Deliverables**:
 - Performance comparison table
@@ -110,12 +110,12 @@ clf.fit(features_train, y_train)
 
 ---
 
-## Priority 3: OPTIONAL (Medium Impact)
+## Priority 3: Supplementary Experiments (Medium Impact)
 
 ### 4. Data Augmentation Impact Study
 
 **Estimated Time**: 2-3 hours  
-**Impact on Grade**: ⭐⭐⭐⭐  
+**Research Value**: ⭐⭐⭐⭐  
 **Difficulty**: ⭐⭐ (Medium)
 
 **Tasks**:
@@ -137,7 +137,7 @@ clf.fit(features_train, y_train)
 ### 5. Feature Fusion Experiment
 
 **Estimated Time**: 2-3 hours  
-**Impact on Grade**: ⭐⭐⭐  
+**Research Value**: ⭐⭐⭐  
 **Difficulty**: ⭐⭐ (Medium)
 
 **Tasks**:
@@ -156,7 +156,7 @@ clf.fit(features_train, y_train)
 ### 6. Enhanced Visualizations
 
 **Estimated Time**: 1-2 hours  
-**Impact on Grade**: ⭐⭐⭐  
+**Research Value**: ⭐⭐⭐  
 **Difficulty**: ⭐ (Easy)
 
 **Tasks**:
@@ -214,28 +214,28 @@ All of the above tasks can be assisted with:
 
 ---
 
-## Success Metrics
+## Research Goals
 
-### Requirements
+### Key Objectives
 - **Error analysis** showing WHY model fails → Priority 1
 - **Structural insights** on Korean characters → Priority 1
 - **Alternative approach** (Hybrid) → Priority 2
-- **Research depth** and critical thinking → All of above
+- **Research depth** and critical thinking → Comprehensive analysis
 
 ---
 
 ## Time Investment Summary
 
-| Task | Time | Impact | Priority |
-|------|------|--------|----------|
-| Confusion Matrix + Error Analysis | 2-3h | ⭐⭐⭐⭐⭐ | MUST |
-| Korean Character Structure Analysis | 1-2h | ⭐⭐⭐⭐ | MUST |
-| Hybrid Model Experiment | 3-4h | ⭐⭐⭐⭐⭐ | HIGH |
-| Data Augmentation Study | 2-3h | ⭐⭐⭐⭐ | OPTIONAL |
-| Enhanced Visualizations | 1-2h | ⭐⭐⭐ | OPTIONAL |
+| Task | Time | Research Value | Priority |
+|------|------|----------------|----------|
+| Confusion Matrix + Error Analysis | 2-3h | ⭐⭐⭐⭐⭐ | Essential |
+| Korean Character Structure Analysis | 1-2h | ⭐⭐⭐⭐ | Essential |
+| Hybrid Model Experiment | 3-4h | ⭐⭐⭐⭐⭐ | High |
+| Data Augmentation Study | 2-3h | ⭐⭐⭐⭐ | Medium |
+| Enhanced Visualizations | 1-2h | ⭐⭐⭐ | Medium |
 
-**Minimum for A+**: Priority 1 tasks (3-5 hours)  
-**Guaranteed A+**: Priority 1 + Hybrid Model (6-9 hours)
+**Recommended minimum**: Priority 1 tasks (3-5 hours)  
+**Comprehensive analysis**: Priority 1 + Hybrid Model (6-9 hours)
 
 ---
 
@@ -257,5 +257,5 @@ All of the above tasks can be assisted with:
 
 ---
 
-**Last Updated**: December 6, 2025  
+**Last Updated**: December 6, 2025
 
