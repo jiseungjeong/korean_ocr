@@ -10,7 +10,14 @@ env/
 
 # Data files (too large for git)
 *.rar
-data/HangulDatabase.rar
+data/
+archive/
+features/hog-extended/
+features/hog_64x64_backup/
+
+# Backup directories
+results_basic_backup/
+*_backup/
 
 # Virtual environment
 ml-env/

@@ -13,9 +13,8 @@ from skimage.feature import hog
 from sklearn.decomposition import PCA
 from typing import List, Tuple, Optional, Dict, Any
 
-# Image preprocessing constants
-IMG_SIZE = 64
-NORMALIZATION_FACTOR = 255.0
+# Import from config
+from config import IMG_SIZE, NORMALIZATION_FACTOR
 
 # HOG feature parameters
 DEFAULT_HOG_PARAMS = {
@@ -41,24 +40,25 @@ IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp")
 def load_and_preprocess_image(path: str) -> Optional[np.ndarray]:
     """
     Load and preprocess an image for feature extraction.
-    
+
     Args:
         path: Path to image file
-        
+
     Returns:
         Preprocessed image array or None if loading fails
     """
     if not os.path.exists(path):
         return None
-        
+
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         return None
-        
+
     img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
     img = img.astype(np.float32) / NORMALIZATION_FACTOR
-    
+
     return img
+
 
 def load_dataset(root_dir):
     X = []
@@ -81,20 +81,23 @@ def load_dataset(root_dir):
 
     return np.array(X), np.array(y), label_to_idx
 
-def extract_hog_features(X: np.ndarray, hog_params: Optional[Dict] = None) -> np.ndarray:
+
+def extract_hog_features(
+    X: np.ndarray, hog_params: Optional[Dict] = None
+) -> np.ndarray:
     """
     Extract HOG features from image array.
-    
+
     Args:
         X: Array of images
         hog_params: Optional HOG parameters
-        
+
     Returns:
         Array of HOG features
     """
     if hog_params is None:
         hog_params = DEFAULT_HOG_PARAMS
-        
+
     hog_features = []
     for img in tqdm(X, desc="Extracting HOG"):
         feature = hog(img, **hog_params)
@@ -112,14 +115,14 @@ def build_gabor_kernels(
 ) -> List[np.ndarray]:
     """
     Build Gabor filter kernels with multiple orientations.
-    
+
     Args:
         ksize: Kernel size
         sigma: Standard deviation of Gaussian envelope
         lambd: Wavelength of sinusoidal factor
         gamma: Spatial aspect ratio
         n_orientations: Number of orientations
-        
+
     Returns:
         List of Gabor kernels
     """
@@ -135,17 +138,17 @@ def extract_gabor_features(
 ) -> np.ndarray:
     """
     Extract Gabor features from image array.
-    
+
     Args:
         X: Array of images
         gabor_params: Optional Gabor parameters
-        
+
     Returns:
         Array of Gabor features
     """
     if gabor_params is None:
         gabor_params = DEFAULT_GABOR_PARAMS
-        
+
     kernels = build_gabor_kernels(**gabor_params)
     features = []
 
@@ -162,12 +165,12 @@ def _iter_image_paths_for_class(
 ) -> List[str]:
     """
     Get all image paths for a given class from basic and extended datasets.
-    
+
     Args:
         basic_root: Path to basic dataset root
         extended_root: Path to extended dataset root
         cls_name: Class name
-        
+
     Returns:
         Sorted list of image paths
     """
@@ -193,7 +196,9 @@ def _iter_image_paths_for_class(
     return sorted(paths)
 
 
-def _extract_feature_for_image(img, extractor_name, hog_params=None, gabor_params=None, gabor_kernels=None):
+def _extract_feature_for_image(
+    img, extractor_name, hog_params=None, gabor_params=None, gabor_kernels=None
+):
     if extractor_name == "hog":
         if hog_params is None:
             hog_params = {}
@@ -202,7 +207,7 @@ def _extract_feature_for_image(img, extractor_name, hog_params=None, gabor_param
             orientations=hog_params.get("orientations", 9),
             pixels_per_cell=hog_params.get("pixels_per_cell", (8, 8)),
             cells_per_block=hog_params.get("cells_per_block", (2, 2)),
-            block_norm=hog_params.get("block_norm", "L2-Hys")
+            block_norm=hog_params.get("block_norm", "L2-Hys"),
         )
         return feature
 
@@ -210,11 +215,14 @@ def _extract_feature_for_image(img, extractor_name, hog_params=None, gabor_param
         if gabor_params is None:
             gabor_params = {}
         if gabor_kernels is None:
-            gabor_kernels = build_gabor_kernels(ksize=gabor_params.get("ksize", 7),
-                                                sigma=gabor_params.get("sigma", 4.0),
-                                                lambd=gabor_params.get("lambd", 10.0),gamma=gabor_params.get("gamma", 0.5),
-                                                n_orientations=gabor_params.get("n_orientations", 4))
-            
+            gabor_kernels = build_gabor_kernels(
+                ksize=gabor_params.get("ksize", 7),
+                sigma=gabor_params.get("sigma", 4.0),
+                lambd=gabor_params.get("lambd", 10.0),
+                gamma=gabor_params.get("gamma", 0.5),
+                n_orientations=gabor_params.get("n_orientations", 4),
+            )
+
         responses = [cv2.filter2D(img, cv2.CV_32F, k) for k in gabor_kernels]
         feat = np.concatenate([r.flatten() for r in responses])
         return feat
@@ -239,10 +247,10 @@ def _extract_feature_for_image(img, extractor_name, hog_params=None, gabor_param
 #         if extractor_name == "gabor":
 #             if gabor_params is None:
 #                 gabor_params = {}
-#             gabor_kernels = build_gabor_kernels(ksize=gabor_params.get("ksize", 7), 
-#                                                 sigma=gabor_params.get("sigma", 4.0), 
-#                                                 lambd=gabor_params.get("lambd", 10.0), 
-#                                                 gamma=gabor_params.get("gamma", 0.5), 
+#             gabor_kernels = build_gabor_kernels(ksize=gabor_params.get("ksize", 7),
+#                                                 sigma=gabor_params.get("sigma", 4.0),
+#                                                 lambd=gabor_params.get("lambd", 10.0),
+#                                                 gamma=gabor_params.get("gamma", 0.5),
 #                                                 n_orientations=gabor_params.get("n_orientations", 4))
 
 #         for cls in classes:
@@ -294,6 +302,7 @@ def _extract_feature_for_image(img, extractor_name, hog_params=None, gabor_param
 #                                         hog_params=hog_params,
 #                                         gabor_params=gabor_params)
 
+
 def extract_hog_feature_for_image(
     img: np.ndarray,
     orientations: int = 9,
@@ -303,14 +312,14 @@ def extract_hog_feature_for_image(
 ) -> np.ndarray:
     """
     Extract HOG feature from a single image.
-    
+
     Args:
         img: Input image
         orientations: Number of orientation bins
         pixels_per_cell: Size of cell
         cells_per_block: Number of cells in block
         block_norm: Block normalization method
-        
+
     Returns:
         HOG feature vector
     """

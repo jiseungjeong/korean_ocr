@@ -19,10 +19,10 @@ DEFAULT_TEST_RATIO = 0.2
 def get_class_names(feature_dir: str) -> List[str]:
     """
     Extract class names from feature directory.
-    
+
     Args:
         feature_dir: Directory containing .npy feature files
-        
+
     Returns:
         Sorted list of class names
     """
@@ -41,14 +41,14 @@ def load_hog_features(
 ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
     """
     Load HOG features from pre-extracted .npy files.
-    
+
     Args:
         feature_dir: Directory containing feature files
         selected_classes: Optional list of classes to load
         max_samples_per_class: Optional limit on samples per class
         shuffle: Whether to shuffle the data
         random_state: Random seed for reproducibility
-        
+
     Returns:
         Tuple of (features, labels, class_names)
     """
@@ -80,7 +80,9 @@ def load_hog_features(
         y_list.append(labels)
 
     if not X_list:
-        raise ValueError(f"No features loaded from {feature_dir}. Check directory and files.")
+        raise ValueError(
+            f"No features loaded from {feature_dir}. Check directory and files."
+        )
 
     X = np.vstack(X_list)
     y = np.concatenate(y_list)
@@ -104,7 +106,7 @@ def _train_test_split(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Split dataset into train and test sets.
-    
+
     Args:
         X: Feature array
         y: Label array
@@ -112,7 +114,7 @@ def _train_test_split(
         test_ratio: Proportion of test data
         random_state: Random seed
         stratify: Whether to use stratified split
-        
+
     Returns:
         Tuple of (X_train, y_train, X_test, y_test)
     """
