@@ -2,12 +2,13 @@
 
 ## Executive Summary
 
-This report presents a comprehensive error analysis of our traditional ML-based Korean character recognition system using HOG features and K-Nearest Neighbors classification.
+This report presents a comprehensive error analysis of our traditional ML-based Korean character recognition system using HOG features and K-Nearest Neighbors classification with **Extended Dataset** (data augmentation applied).
 
 **Key Findings**:
-- Test Accuracy: **78.83%** (271 errors out of 1,280 test samples)
-- PCA preserved **96.40%** of variance with 256 components
-- Significant performance variation across classes (35% - 100%)
+- Test Accuracy: **84.67%** (4,120 errors out of 26,880 test samples)
+- **+5.84%p improvement** over Basic dataset (78.83% → 84.67%)
+- PCA preserved **87.39%** of variance with 256 components
+- Significant performance improvement on previously difficult classes
 - Clear patterns in misclassification related to Korean character structure
 
 ---
@@ -15,19 +16,20 @@ This report presents a comprehensive error analysis of our traditional ML-based 
 ## Model Performance
 
 ### Overall Metrics
-- **Training samples**: 5,120
-- **Test samples**: 1,280
+- **Dataset**: Extended (with 20x augmentation via Albumentations)
+- **Training samples**: 107,520 (21x increase from Basic)
+- **Test samples**: 26,880 (21x increase from Basic)
 - **Number of classes**: 64
 - **Feature dimension**: 1,764 (HOG) → 256 (PCA)
 - **Classifier**: K-Nearest Neighbors (k=7)
-- **Test Accuracy**: 78.83%
+- **Test Accuracy**: 84.67% (+5.84%p improvement)
 
 ### Performance Distribution
-- **Perfect performance** (100%): 3 classes (eu, iss, won)
-- **High performance** (>90%): 4 classes (a, bu, choe, gim)
-- **Good performance** (80-90%): 25 classes
-- **Moderate performance** (70-80%): 22 classes
-- **Low performance** (<70%): 10 classes
+- **Excellent performance** (>95%): 3 classes (geos: 98.8%, bak: 96.4%, su: 96.0%)
+- **High performance** (90-95%): 7 classes
+- **Good performance** (80-90%): 35 classes
+- **Moderate performance** (70-80%): 14 classes
+- **Challenging performance** (<70%): 5 classes (i: 61%, jeong: 62%, yeo: 64%, ji: 64%, eo: 70%)
 
 ---
 
@@ -37,27 +39,29 @@ This report presents a comprehensive error analysis of our traditional ML-based 
 
 | Rank | True Class | Predicted Class | Error Count | Error Rate |
 |------|------------|-----------------|-------------|------------|
-| 1 | so (소) | seu (스) | 4 | 20% |
-| 2 | deul (들) | reul (를) | 4 | 20% |
-| 3 | seong (성) | sang (상) | 4 | 20% |
-| 4 | na (나) | a (아) | 4 | 20% |
-| 5 | si (시) | sa (사) | 4 | 20% |
-| 6 | si (시) | seo (서) | 4 | 20% |
-| 7 | seo (서) | si (시) | 4 | 20% |
-| 8 | bo (보) | bu (부) | 4 | 20% |
-| 9 | in (인) | il (일) | 3 | 15% |
-| 10 | ro (로) | eul (을) | 3 | 15% |
+| 1 | yeo (여) | eo (어) | 87 | 20.7% |
+| 2 | i (이) | eo (어) | 68 | 16.2% |
+| 3 | ji (지) | gi (기) | 52 | 12.4% |
+| 4 | deul (들) | reul (를) | 45 | 10.7% |
+| 5 | jeong (정) | gyeong (경) | 44 | 10.5% |
+| 6 | si (시) | seo (서) | 43 | 10.2% |
+| 7 | seo (서) | si (시) | 42 | 10.0% |
+| 8 | eo (어) | yeo (여) | 42 | 10.0% |
+| 9 | eo (어) | i (이) | 39 | 9.3% |
+| 10 | geu (그) | eu (으) | 37 | 8.8% |
 
 ### Worst Performing Classes
 
-| Rank | Class | Accuracy | Correct | Wrong |
-|------|-------|----------|---------|-------|
-| 1 | ji (지) | 35% | 7 | 13 |
-| 2 | si (시) | 40% | 8 | 12 |
-| 3 | in (인) | 55% | 11 | 9 |
-| 4 | jang (장) | 60% | 12 | 8 |
-| 5 | seong (성) | 60% | 12 | 8 |
-| 6 | na (나) | 60% | 12 | 8 |
+| Rank | Class | Accuracy | Correct | Wrong | Improvement from Basic |
+|------|-------|----------|---------|-------|------------------------|
+| 1 | i (이) | 61.0% | 256 | 164 | +26.0%p ⭐ |
+| 2 | jeong (정) | 62.1% | 261 | 159 | +2.1%p |
+| 3 | yeo (여) | 64.3% | 270 | 150 | N/A (new) |
+| 4 | ji (지) | 64.3% | 270 | 150 | **+29.3%p** ⭐⭐ |
+| 5 | eo (어) | 69.5% | 292 | 128 | N/A (new) |
+| 6 | si (시) | 75.0% | 315 | 105 | **+35.0%p** ⭐⭐⭐ |
+
+**Note**: Classes marked with ⭐ showed massive improvement with Extended dataset!
 
 ---
 

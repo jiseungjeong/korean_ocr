@@ -18,7 +18,7 @@ KNN_N_NEIGHBORS = 7
 # Dataset paths
 BASIC_DATASET_PATH = "archive/Hangul Database/Hangul Database"
 EXTENDED_DATASET_PATH = "archive/Hangul Database Extended/Hangul Database Extended"
-FEATURES_PATH = "features/hog"
+FEATURES_PATH = "features/hog-extended"  # Using extended dataset (134,400 samples)
 RESULTS_PATH = "results"
 ERROR_CASES_PATH = "results/error_cases"
 
@@ -38,4 +38,3 @@ NORMALIZATION_FACTOR = 255.0
 CONFUSION_MATRIX_SIZE = (20, 18)
 PER_CLASS_ACC_SIZE = (16, 10)
 DPI = 300
-

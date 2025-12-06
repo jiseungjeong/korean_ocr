@@ -87,13 +87,16 @@ While CNNs automatically learn features, we **manually design features using HOG
 
 | Item | Description |
 |------|-------------|
-| **Dataset Name** | Handwritten Korean Characters |
+| **Dataset Name** | Handwritten Korean Characters (Extended) |
 | **Source** | Kaggle |
 | **URL** | [https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters](https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters) |
-| **Total Images** | 6,400 images |
+| **Basic Dataset** | 6,400 images (64 classes × 100 images) |
+| **Extended Dataset** | 128,000 images (20x augmentation via Albumentations) |
+| **Total Images** | 134,400 images |
 | **Number of Classes** | 64 (Korean syllables/word-level labels) |
 | **Format** | RGB images, varying sizes |
 | **Train/Test Split** | 80% / 20% (stratified) |
+| **Augmentation** | Rotation, noise, distortion, brightness/contrast adjustment |
 
 ### Data Characteristics
 
@@ -199,18 +202,18 @@ Open and run `main.ipynb` in Jupyter Notebook or Google Colab for the complete t
 
 ### Model Performance Summary
 
-Based on experiments in `main.ipynb`:
+Based on experiments with **Extended Dataset** (134,400 samples):
 
-| Model | Best Parameters | CV Accuracy | Test Accuracy |
-|-------|----------------|-------------|---------------|
-| **K-Nearest Neighbors** | k=7 | **82.27%** | (To be measured) |
-| **Logistic Regression** | C=1.0 | 78.97% | - |
-| **Random Forest** | n_estimators=75 | 62.66% | - |
+| Model | Best Parameters | Test Accuracy | Improvement from Basic |
+|-------|----------------|---------------|------------------------|
+| **K-Nearest Neighbors** | k=7 | **84.67%** | **+5.84%p** |
+| Logistic Regression | C=1.0 | (To be measured) | - |
+| Random Forest | n_estimators=75 | (To be measured) | - |
 
 ### Key Achievement
 
-**HOG → PCA → ML Classifier** pipeline achieves **over 80% accuracy**  
-without any deep learning, demonstrating the power of classical ML approaches.
+**HOG → PCA → ML Classifier** with Extended dataset achieves **84.67% accuracy**  
+without any deep learning, demonstrating that **data augmentation significantly improves traditional ML performance**.
 
 **Dataset Statistics**:
 - Training samples: 107,520
@@ -234,6 +237,13 @@ We compare our traditional ML approach against a state-of-the-art deep learning 
 ### Research Goal
 
 Analyze the **advantages and limitations** of traditional ML approaches compared to deep learning baselines, and identify opportunities for hybrid approaches.
+
+### Performance Gap Analysis
+
+- **Traditional ML (Extended)**: 84.67%
+- **Deep Learning Baseline**: 97.62%
+- **Gap**: 12.95 percentage points
+- **Improvement with augmentation**: +5.84%p (78.83% → 84.67%)
 
 ## Feature Visualization
 
