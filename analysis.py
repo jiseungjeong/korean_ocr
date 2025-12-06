@@ -1,6 +1,8 @@
 """
-Error Analysis and Model Performance Evaluation
-Confusion Matrix & Misclassification Pattern Analysis
+Error Analysis and Model Performance Evaluation.
+
+This script performs confusion matrix generation and analyzes
+misclassification patterns in Korean character recognition.
 """
 
 import os
@@ -8,16 +10,24 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
-import cv2
+
+from config import (
+    RANDOM_SEED,
+    PCA_N_COMPONENTS,
+    KNN_N_NEIGHBORS,
+    FEATURES_PATH,
+    RESULTS_PATH,
+    CONFUSION_MATRIX_SIZE,
+    PER_CLASS_ACC_SIZE,
+    DPI,
+)
 from dataloader import load_hog_features, _train_test_split
-from feature_extractor import load_and_preprocess_image, extract_hog_feature_for_image
 
 # Set seed for reproducibility
-SEED = 42
-np.random.seed(SEED)
+np.random.seed(RANDOM_SEED)
 
 print("=" * 80)
 print("PRIORITY 1: CONFUSION MATRIX & ERROR ANALYSIS")
@@ -25,13 +35,12 @@ print("=" * 80)
 
 # Load HOG features
 print("\n[1/6] Loading HOG features...")
-feature_dir = "features/hog"
 X, y, class_names = load_hog_features(
-    feature_dir=feature_dir,
+    feature_dir=FEATURES_PATH,
     selected_classes=None,
     max_samples_per_class=None,
     shuffle=True,
-    random_state=SEED,
+    random_state=RANDOM_SEED,
 )
 print(f"Loaded: {X.shape[0]} samples, {len(class_names)} classes")
 print(f"Feature dimension: {X.shape[1]}")
@@ -40,22 +49,21 @@ print(f"\nClass names: {class_names}")
 # Train-test split
 print("\n[2/6] Splitting data...")
 X_train, y_train, X_test, y_test = _train_test_split(
-    X, y, train_ratio=0.8, test_ratio=0.2, random_state=SEED, stratify=True
+    X, y, random_state=RANDOM_SEED, stratify=True
 )
 print(f"Train: {X_train.shape}, Test: {X_test.shape}")
 
 # PCA
 print("\n[3/6] Applying PCA...")
-N_COMPONENTS = 256
-pca = PCA(n_components=N_COMPONENTS, random_state=SEED)
+pca = PCA(n_components=PCA_N_COMPONENTS, random_state=RANDOM_SEED)
 X_train_pca = pca.fit_transform(X_train)
 X_test_pca = pca.transform(X_test)
 print(f"PCA variance explained: {pca.explained_variance_ratio_.sum():.4f}")
 print(f"Reduced dimension: {X_train_pca.shape[1]}")
 
-# Train best model (KNN with k=7)
-print("\n[4/6] Training KNN classifier...")
-knn = KNeighborsClassifier(n_neighbors=7)
+# Train best model (KNN)
+print(f"\n[4/6] Training KNN classifier (k={KNN_N_NEIGHBORS})...")
+knn = KNeighborsClassifier(n_neighbors=KNN_N_NEIGHBORS)
 knn.fit(X_train_pca, y_train)
 y_pred = knn.predict(X_test_pca)
 
@@ -68,18 +76,20 @@ print("\n[5/6] Generating confusion matrix...")
 cm = confusion_matrix(y_test, y_pred)
 
 # Save confusion matrix visualization
-plt.figure(figsize=(20, 18))
+os.makedirs(RESULTS_PATH, exist_ok=True)
+plt.figure(figsize=CONFUSION_MATRIX_SIZE)
 sns.heatmap(
     cm, annot=False, cmap="Blues", xticklabels=class_names, yticklabels=class_names
 )
-plt.title("Confusion Matrix - KNN (k=7)", fontsize=16)
+plt.title(f"Confusion Matrix - KNN (k={KNN_N_NEIGHBORS})", fontsize=16)
 plt.xlabel("Predicted Label", fontsize=14)
 plt.ylabel("True Label", fontsize=14)
 plt.xticks(rotation=45, ha="right")
 plt.yticks(rotation=0)
 plt.tight_layout()
-plt.savefig("results/confusion_matrix.png", dpi=300, bbox_inches="tight")
-print("Saved: results/confusion_matrix.png")
+confusion_matrix_path = os.path.join(RESULTS_PATH, "confusion_matrix.png")
+plt.savefig(confusion_matrix_path, dpi=DPI, bbox_inches="tight")
+print(f"Saved: {confusion_matrix_path}")
 
 # Find most confused pairs
 print("\n[6/6] Analyzing most confused character pairs...")
@@ -103,9 +113,9 @@ print("\nTop 20 Most Confused Character Pairs:")
 print(confused_df.head(20).to_string(index=False))
 
 # Save to CSV
-os.makedirs("results", exist_ok=True)
-confused_df.to_csv("results/confused_pairs.csv", index=False)
-print("\nSaved: results/confused_pairs.csv")
+confused_pairs_path = os.path.join(RESULTS_PATH, "confused_pairs.csv")
+confused_df.to_csv(confused_pairs_path, index=False)
+print(f"\nSaved: {confused_pairs_path}")
 
 # Per-class accuracy
 print("\n" + "=" * 80)
@@ -137,11 +147,12 @@ print("\nBest 10 Classes:")
 print(per_class_df.tail(10).to_string(index=False))
 
 # Save per-class accuracy
-per_class_df.to_csv("results/per_class_accuracy.csv", index=False)
-print("\nSaved: results/per_class_accuracy.csv")
+per_class_csv_path = os.path.join(RESULTS_PATH, "per_class_accuracy.csv")
+per_class_df.to_csv(per_class_csv_path, index=False)
+print(f"\nSaved: {per_class_csv_path}")
 
 # Visualize per-class accuracy
-plt.figure(figsize=(16, 10))
+plt.figure(figsize=PER_CLASS_ACC_SIZE)
 colors = [
     "red" if acc < 0.7 else "orange" if acc < 0.8 else "green"
     for acc in per_class_df["Accuracy"]
@@ -154,8 +165,9 @@ plt.title("Per-Class Accuracy (Red < 0.7, Orange < 0.8, Green >= 0.8)", fontsize
 plt.axvline(x=0.8, color="gray", linestyle="--", linewidth=1)
 plt.grid(axis="x", alpha=0.3)
 plt.tight_layout()
-plt.savefig("results/per_class_accuracy.png", dpi=300, bbox_inches="tight")
-print("Saved: results/per_class_accuracy.png")
+per_class_png_path = os.path.join(RESULTS_PATH, "per_class_accuracy.png")
+plt.savefig(per_class_png_path, dpi=DPI, bbox_inches="tight")
+print(f"Saved: {per_class_png_path}")
 
 print("\n" + "=" * 80)
 print("ANALYSIS COMPLETE!")

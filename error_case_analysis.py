@@ -1,22 +1,33 @@
 """
-Error Case Visualization and Analysis
-Extract and visualize misclassified samples with HOG features
+Error Case Visualization and Analysis.
+
+This script extracts and visualizes misclassified samples with HOG features
+to understand why the model makes specific errors.
 """
 
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
-from dataloader import load_hog_features, _train_test_split
-from feature_extractor import load_and_preprocess_image, extract_hog_feature_for_image
 from skimage.feature import hog
 from skimage import exposure
 
+from config import (
+    RANDOM_SEED,
+    PCA_N_COMPONENTS,
+    KNN_N_NEIGHBORS,
+    FEATURES_PATH,
+    RESULTS_PATH,
+    ERROR_CASES_PATH,
+    BASIC_DATASET_PATH,
+)
+from dataloader import load_hog_features, _train_test_split
+
 # Set seed
-SEED = 42
-np.random.seed(SEED)
+np.random.seed(RANDOM_SEED)
 
 print("=" * 80)
 print("ERROR CASE VISUALIZATION")
@@ -24,19 +35,18 @@ print("=" * 80)
 
 # Load features and train model
 print("\n[1/5] Loading features and training model...")
-feature_dir = "features/hog"
 X, y, class_names = load_hog_features(
-    feature_dir=feature_dir, shuffle=True, random_state=SEED
+    feature_dir=FEATURES_PATH, shuffle=True, random_state=RANDOM_SEED
 )
 X_train, y_train, X_test, y_test = _train_test_split(
-    X, y, train_ratio=0.8, test_ratio=0.2, random_state=SEED, stratify=True
+    X, y, random_state=RANDOM_SEED, stratify=True
 )
 
-pca = PCA(n_components=256, random_state=SEED)
+pca = PCA(n_components=PCA_N_COMPONENTS, random_state=RANDOM_SEED)
 X_train_pca = pca.fit_transform(X_train)
 X_test_pca = pca.transform(X_test)
 
-knn = KNeighborsClassifier(n_neighbors=7)
+knn = KNeighborsClassifier(n_neighbors=KNN_N_NEIGHBORS)
 knn.fit(X_train_pca, y_train)
 y_pred = knn.predict(X_test_pca)
 
@@ -49,12 +59,11 @@ print(
 
 # Create mapping from test indices to image paths
 print("\n[3/5] Creating image mapping...")
-base_dir = "archive/Hangul Database/Hangul Database"
 
 
 def get_image_path_for_class(class_name, sample_idx):
-    """Get image path for a given class and sample index"""
-    class_dir = os.path.join(base_dir, class_name)
+    """Get image path for a given class and sample index."""
+    class_dir = os.path.join(BASIC_DATASET_PATH, class_name)
     if not os.path.isdir(class_dir):
         return None
     files = sorted([f for f in os.listdir(class_dir) if f.endswith(".jpg")])
@@ -65,12 +74,12 @@ def get_image_path_for_class(class_name, sample_idx):
 
 # Visualize top confused pairs
 print("\n[4/5] Visualizing error cases...")
-import pandas as pd
 
-confused_df = pd.read_csv("results/confused_pairs.csv")
+confused_pairs_path = os.path.join(RESULTS_PATH, "confused_pairs.csv")
+confused_df = pd.read_csv(confused_pairs_path)
 top_pairs = confused_df.head(10)
 
-os.makedirs("results/error_cases", exist_ok=True)
+os.makedirs(ERROR_CASES_PATH, exist_ok=True)
 
 for idx, row in top_pairs.iterrows():
     true_class = row["True Class"]
@@ -162,14 +171,17 @@ for idx, row in top_pairs.iterrows():
                 axes[i, 3].axis("off")
 
     plt.tight_layout()
-    filename = f"results/error_cases/{idx+1:02d}_{true_class}_to_{pred_class}.png"
+    filename = os.path.join(
+        ERROR_CASES_PATH, f"{idx+1:02d}_{true_class}_to_{pred_class}.png"
+    )
     plt.savefig(filename, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"  Saved: {filename}")
 
 print("\n[5/5] Creating summary visualization...")
 # Create a summary figure showing worst performing classes
-per_class_df = pd.read_csv("results/per_class_accuracy.csv")
+per_class_csv_path = os.path.join(RESULTS_PATH, "per_class_accuracy.csv")
+per_class_df = pd.read_csv(per_class_csv_path)
 worst_classes = per_class_df.nsmallest(6, "Accuracy")
 
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
@@ -197,8 +209,9 @@ for idx, (_, row) in enumerate(worst_classes.iterrows()):
 
 plt.suptitle("Worst Performing Classes", fontsize=16)
 plt.tight_layout()
-plt.savefig("results/worst_classes_samples.png", dpi=150, bbox_inches="tight")
-print("  Saved: results/worst_classes_samples.png")
+worst_classes_path = os.path.join(RESULTS_PATH, "worst_classes_samples.png")
+plt.savefig(worst_classes_path, dpi=150, bbox_inches="tight")
+print(f"  Saved: {worst_classes_path}")
 
 print("\n" + "=" * 80)
 print("ERROR CASE ANALYSIS COMPLETE!")
