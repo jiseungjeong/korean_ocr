@@ -2,7 +2,7 @@
 
 **CSE36301: Machine Learning — Final Project**  
 **UNIST, 2025 Fall Semester**  
-**Team: Group 14**
+**Team: Group 2**
 
 ---
 
@@ -302,6 +302,8 @@ Dataset license follows Kaggle original terms.
 
 - [@geonhokim1](https://github.com/geonhokim1)
 - [@jiseungjeong](https://github.com/jiseungjeong)
+- Dahyun Kim
+- Caherin Hwang
 
 ---
 
