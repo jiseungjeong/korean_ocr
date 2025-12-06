@@ -17,6 +17,10 @@ archive/
 features/
 *.npy
 
+# Trained models
+models/
+*.pkl
+
 # Backup directories
 results_basic_backup/
 *_backup/
