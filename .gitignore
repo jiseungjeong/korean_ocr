@@ -12,8 +12,10 @@ env/
 *.rar
 data/
 archive/
-features/hog-extended/
-features/hog_64x64_backup/
+
+# Feature files (too large for git)
+features/
+*.npy
 
 # Backup directories
 results_basic_backup/
