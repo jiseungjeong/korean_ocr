@@ -30,39 +30,39 @@ os.makedirs(JAMO_MODELS_DIR, exist_ok=True)
 def load_jamo_features(jamo_type):
     """
     Load all HOG features for a specific Jamo type (cho/jung/jong).
-    
+
     Returns:
         X: Feature matrix
         y: Label vector
         jamo_names: List of Jamo names
     """
     features_dir = os.path.join(JAMO_FEATURES_DIR, jamo_type)
-    
+
     if not os.path.exists(features_dir):
         print(f"Error: {features_dir} not found!")
         return None, None, None
-    
+
     all_features = []
     all_labels = []
     jamo_names = []
-    
+
     # Load each Jamo's features
     for filename in sorted(os.listdir(features_dir)):
-        if not filename.endswith('.npy'):
+        if not filename.endswith(".npy"):
             continue
-        
-        jamo_name = filename.replace('.npy', '')
+
+        jamo_name = filename.replace(".npy", "")
         jamo_names.append(jamo_name)
-        
+
         features = np.load(os.path.join(features_dir, filename))
         labels = np.full(len(features), len(jamo_names) - 1)  # Current index
-        
+
         all_features.append(features)
         all_labels.append(labels)
-    
+
     X = np.vstack(all_features)
     y = np.concatenate(all_labels)
-    
+
     return X, y, jamo_names
 
 
@@ -151,10 +151,10 @@ if X_jong_train is not None:
     jong_knn = KNeighborsClassifier()
     grid_jong = GridSearchCV(jong_knn, param_grid, cv=3, n_jobs=-1, verbose=1)
     grid_jong.fit(X_jong_train, y_jong_train)
-    
+
     y_jong_pred = grid_jong.predict(X_jong_test)
     jong_acc = accuracy_score(y_jong_test, y_jong_pred)
-    
+
     print(f"  Best params: {grid_jong.best_params_}")
     print(f"  CV score: {grid_jong.best_score_:.4f}")
     print(f"  Test accuracy: {jong_acc:.4f}")
@@ -194,4 +194,3 @@ if jong_acc is not None:
 else:
     print(f"  종성: Not trained (insufficient data)")
 print("\nNext: Apply these classifiers to complete character images")
-

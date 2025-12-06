@@ -171,32 +171,32 @@ def parse_romanized_character(rom_char):
 def romanization_to_jamo(rom_char):
     """
     Convert romanized character to actual Hangul Jamo components.
-    
+
     Args:
         rom_char: Romanized character
-    
+
     Returns:
         tuple: (초성, 중성, 종성) in Hangul Jamo
     """
     cho_rom, jung_rom, jong_rom = parse_romanized_character(rom_char)
-    
+
     cho_jamo = CHO_ROM_TO_JAMO.get(cho_rom, "")
     jung_jamo = JUNG_ROM_TO_JAMO.get(jung_rom, "")
     jong_jamo = JONG_ROM_TO_JAMO.get(jong_rom, "")
-    
+
     return cho_jamo, jung_jamo, jong_jamo
 
 
 def romanization_to_romanized_jamos(rom_char):
     """
     Convert romanized character to romanized Jamo component names.
-    
+
     This returns the romanization strings themselves, matching the
     Jamo classifier's class names (e.g., 'g', 'a', 'ng').
-    
+
     Args:
         rom_char: Romanized character
-    
+
     Returns:
         tuple: (cho_rom, jung_rom, jong_rom) as romanization strings
     """

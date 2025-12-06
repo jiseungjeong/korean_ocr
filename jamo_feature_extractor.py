@@ -19,10 +19,58 @@ JAMO_DATA_DIR = "data/hangul_characters_v1"
 JAMO_FEATURES_DIR = "features/jamo"
 
 # Jamo categorization
-CHO_JAMOS = ["g", "gg", "n", "d", "r", "m", "b", "bb", "s", "ss", "j", "ch", "k", "t", "p", "h"]
-JUNG_JAMOS = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", 
-              "u", "wo", "we", "wi", "yu", "eu", "ui", "i"]
-JONG_JAMOS = ["", "k", "n", "ng", "l", "m", "s", "ss", "t"]  # Empty = no final consonant
+CHO_JAMOS = [
+    "g",
+    "gg",
+    "n",
+    "d",
+    "r",
+    "m",
+    "b",
+    "bb",
+    "s",
+    "ss",
+    "j",
+    "ch",
+    "k",
+    "t",
+    "p",
+    "h",
+]
+JUNG_JAMOS = [
+    "a",
+    "ae",
+    "ya",
+    "yae",
+    "eo",
+    "e",
+    "yeo",
+    "ye",
+    "o",
+    "wa",
+    "wae",
+    "oe",
+    "yo",
+    "u",
+    "wo",
+    "we",
+    "wi",
+    "yu",
+    "eu",
+    "ui",
+    "i",
+]
+JONG_JAMOS = [
+    "",
+    "k",
+    "n",
+    "ng",
+    "l",
+    "m",
+    "s",
+    "ss",
+    "t",
+]  # Empty = no final consonant
 
 print("=" * 80)
 print("JAMO-LEVEL HOG FEATURE EXTRACTION")
@@ -42,10 +90,10 @@ def extract_hog_from_image(img_path):
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         return None
-    
+
     img_resized = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
     img_norm = img_resized.astype(np.float32) / NORMALIZATION_FACTOR
-    
+
     features = hog(
         img_norm,
         orientations=9,
@@ -78,12 +126,12 @@ def categorize_jamo(jamo_name):
 print("\n[1/4] Scanning Jamo image files...")
 jamo_files = defaultdict(list)
 
-all_files = [f for f in os.listdir(JAMO_DATA_DIR) if f.endswith('.jpg')]
+all_files = [f for f in os.listdir(JAMO_DATA_DIR) if f.endswith(".jpg")]
 print(f"Total files: {len(all_files)}")
 
 for filename in all_files:
     # Parse filename: {jamo}_{rotation}_{sample}.jpg
-    parts = filename.replace('.jpg', '').split('_')
+    parts = filename.replace(".jpg", "").split("_")
     if len(parts) >= 3:
         jamo_name = parts[0]
         jamo_files[jamo_name].append(filename)
@@ -100,7 +148,7 @@ jong_features = {}
 
 for jamo_name, file_list in tqdm(jamo_files.items(), desc="Processing Jamos"):
     category = categorize_jamo(jamo_name)
-    
+
     # Extract features from all images of this Jamo
     features_list = []
     for filename in file_list:
@@ -108,13 +156,13 @@ for jamo_name, file_list in tqdm(jamo_files.items(), desc="Processing Jamos"):
         features = extract_hog_from_image(img_path)
         if features is not None:
             features_list.append(features)
-    
+
     if len(features_list) == 0:
         continue
-    
+
     # Stack features
     features_array = np.array(features_list)
-    
+
     # Save based on category
     if category == "cho":
         cho_features[jamo_name] = features_array
@@ -159,4 +207,3 @@ print(f"  초성: {len(cho_features)} types")
 print(f"  중성: {len(jung_features)} types")
 print(f"  종성: {len(jong_features)} types")
 print(f"\nOutput directory: {JAMO_FEATURES_DIR}/")
-
