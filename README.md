@@ -1,135 +1,181 @@
 # Handwritten Korean Character Recognition using Traditional ML
 
 **CSE36301: Machine Learning — Final Project**  
-**UNIST, 2025 Fall Semester**  
+**UNIST, Fall 2025**  
 **Team: Group 2**
 
 ---
 
-## Project Overview
+## Overview
 
-This project tackles the **Optical Character Recognition (OCR)** problem for handwritten Korean characters using **classical machine learning approaches** without deep learning. We leverage the publicly available **Kaggle Handwritten Korean Characters Dataset** to develop an automated recognition system.
+This project builds a **Hangul OCR system using traditional machine learning** instead of deep learning. We focus on achieving reasonable accuracy while maintaining interpretability and conducting systematic error analysis to understand why certain methods succeed or fail.
 
-### Key Objectives
+### Key Achievements
 
-- Build a **traditional ML-based HOG-OCR model** for Korean character recognition
-- Compare performance against **baseline deep learning model** (Korean Character Lightning Xception)
-- Gain deep understanding of ML pipeline through hands-on implementation of preprocessing, feature extraction, training, and evaluation
-- Demonstrate that classical ML can achieve competitive results on vision tasks
+- **84.65% accuracy** with HOG + PCA + KNN on 64 Hangul characters
+- **Comprehensive jamo-level error analysis** decomposing failures into initial/medial/final consonant patterns
+- **Scientific analysis of negative results** from hierarchical jamo-based classification (2.51% accuracy)
+- **Feature-label alignment insights** demonstrating fundamental limitations of rule-based segmentation
+
+---
 
 ## Project Structure
 
 ```
 pdp_ocr/
-├── feature_extractor.py    # Feature extraction utilities (HOG, Gabor)
-├── dataloader.py           # Data loading and preprocessing
-├── main.ipynb              # Main training and evaluation notebook
-└── README.md
+├── feature_extractor.py           # HOG feature extraction
+├── dataloader.py                  # Data loading and splitting
+├── config.py                      # Centralized configuration
+├── analysis.py                    # Confusion matrix and per-class analysis
+├── error_case_analysis.py         # Visualization of misclassified samples
+├── jamo_analysis.py               # Jamo-level error decomposition
+├── jamo_classifier_train.py       # Isolated jamo classifier training
+├── jamo_full_pipeline.py          # Complete jamo-based pipeline
+├── romanization_mapping.py        # Romanization to jamo mapping
+├── results/                       # All experimental results
+│   ├── confusion_matrix.png
+│   ├── per_class_accuracy.csv
+│   ├── jamo_analysis/
+│   └── report_figures/
+├── models/                        # Trained models
+│   ├── pca.pkl
+│   ├── knn.pkl
+│   └── jamo/
+├── ANALYSIS_REPORT.md            # Detailed error analysis
+├── JAMO_ANALYSIS_REPORT.md       # Jamo-level error analysis
+└── JAMO_FULL_IMPLEMENTATION_REPORT.md  # Hierarchical classification results
 ```
-
-## Problem Definition & Research Question
-
-> **"Can computers recognize Korean handwriting without deep learning,  
-> just as humans read handwritten text?"**
-
-To answer this question, we built a **classical machine learning OCR pipeline** that relies on carefully designed feature extractors rather than automated deep feature learning.
-
-### Processing Pipeline
-
-| Stage | Description |
-|-------|-------------|
-| **Preprocessing** | Grayscale conversion, resize to 64×64 |
-| **Feature Engineering** | HOG feature extraction (emphasizing contours/gradients), Gabor filters |
-| **Dimensionality Reduction** | PCA (256 components, preserving 87% variance) |
-| **Model Training** | Logistic Regression / SVM / KNN / Random Forest |
-| **Hyperparameter Tuning** | GridSearchCV with 3-Fold Cross-Validation |
-| **Evaluation** | Accuracy / Precision / Recall / F1 / ROC Curves |
-
-### Key Idea
-
-While CNNs automatically learn features, we **manually design features using HOG** and only train the classifier on top of them.
 
 ---
 
-## Features
+## Dataset
 
-### Feature Extraction (`feature_extractor.py`)
-- **HOG Features**: Extracts Histogram of Oriented Gradients features with configurable parameters
-  - Orientations: 9
-  - Pixels per cell: (8, 8)
-  - Cells per block: (2, 2)
-  - Block normalization: L2-Hys
-- **Gabor Filters**: Multi-orientation Gabor filter banks for texture analysis
-- **Image Preprocessing**: Grayscale conversion and resizing (64x64)
-- **Batch Processing**: Class-wise feature extraction with resume capability
+| Item | Details |
+|------|---------|
+| **Source** | [Handwritten Korean Characters (Extended)](https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters) |
+| **Classes** | 64 Korean syllables |
+| **Total Images** | 134,400 (2,100 per class) |
+| **Split** | 107,520 train / 26,880 test (80/20, stratified) |
+| **Preprocessing** | Grayscale, 64×64 resize, normalization |
+| **Augmentation** | 20× via rotation, noise, distortion, brightness/contrast |
 
-### Data Loading (`dataloader.py`)
-- Load pre-extracted HOG features from `.npy` files
-- Support for class selection and sampling
-- Stratified train-test splitting
-- Configurable data augmentation options
+---
 
-### Training Pipeline (`main.ipynb`)
-- **Dimensionality Reduction**: PCA (256 components, ~87% variance explained)
-- **Hyperparameter Tuning**: GridSearchCV with 3-fold cross-validation
-- **Performance Metrics**: Accuracy, Precision, Recall, F1-score, ROC curves
+## Methodology
 
-### Machine Learning Models
+### 1. Feature Extraction
+- **HOG (Histogram of Oriented Gradients)**
+  - 9 orientations, 8×8 pixel cells, 2×2 cell blocks
+  - L2-Hys normalization
+  - Output: 1,764-dimensional feature vector per image
 
-| Algorithm | Purpose & Configuration | Characteristics |
-|-----------|------------------------|-----------------|
-| **Logistic Regression** | C ∈ {0.1, 1.0, 10.0} | Multinomial softmax classification |
-| **K-Nearest Neighbors** | k ∈ {3, 5, 7} | Feature similarity-based |
-| **Random Forest** | Trees ∈ {25, 50, 75} | Robust to noisy features |
-| **SVM** | (Excluded from final report due to overfitting) | Margin-based decision boundary |
+### 2. Dimensionality Reduction
+- **PCA**: 1,764 → 256 dimensions
+- Preserves 87.4% variance
+- Improves computational efficiency
 
-## Dataset Information
+### 3. Classification
+- **K-Nearest Neighbors (KNN)**: k ∈ {3, 5, 7}
+- **Logistic Regression**: C ∈ {0.1, 1, 10}
+- **Random Forest**: estimators ∈ {25, 50, 75}
+- **SVM**: Excluded due to training time (>5 hours)
 
-| Item | Description |
-|------|-------------|
-| **Dataset Name** | Handwritten Korean Characters (Extended) |
-| **Source** | Kaggle |
-| **URL** | [https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters](https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters) |
-| **Basic Dataset** | 6,400 images (64 classes × 100 images) |
-| **Extended Dataset** | 128,000 images (20x augmentation via Albumentations) |
-| **Total Images** | 134,400 images |
-| **Number of Classes** | 64 (Korean syllables/word-level labels) |
-| **Format** | RGB images, varying sizes |
-| **Train/Test Split** | 80% / 20% (stratified) |
-| **Augmentation** | Rotation, noise, distortion, brightness/contrast adjustment |
+### 4. Hyperparameter Tuning
+- **GridSearchCV** with 3-fold cross-validation
+- All experiments on Google Colab (Intel Xeon CPU @ 2.20GHz, 12GB RAM)
 
-### Data Characteristics
+---
 
-The dataset contains handwritten Korean characters with varying resolutions and writing pressures. This necessitates **aggressive normalization and feature extraction** to ensure consistent recognition performance.
+## Results
 
-### Dataset Structure
+### Model Performance
 
-```
-archive/
-├── Hangul Database/
-│   └── Hangul Database/
-│       ├── class1/  (Korean syllable 1)
-│       ├── class2/  (Korean syllable 2)
-│       └── ...
-└── Hangul Database Extended/
-    └── Hangul Database Extended/
-        ├── class1/  (Additional samples)
-        ├── class2/
-        └── ...
-```
+| Model | Best Parameters | Accuracy | Precision | Recall | F1-Score |
+|-------|----------------|----------|-----------|--------|----------|
+| **KNN** | k=7 | **84.65%** | 85.29% | 84.65% | 84.74% |
+| Logistic Regression | C=1.0 | 79.83% | 79.86% | 79.83% | 79.81% |
+| Random Forest | n_estimators=75 | 66.13% | 66.58% | 66.13% | 65.94% |
+
+### Key Findings
+
+1. **Data augmentation improves performance by 5.84 percentage points** (78.83% → 84.65%)
+2. **Errors are structurally driven**: Confusion occurs between visually similar characters (e.g., yeo ↔ eo, ji ↔ gi)
+3. **Jamo-level error distribution is balanced**:
+   - Initial consonant (초성): 37.3%
+   - Medial vowel (중성): 36.2%
+   - Final consonant (종성): 26.6%
+
+### Error Analysis
+
+**Per-Class Performance**:
+- **Worst performers**: i (61%), jeong (62%), yeo (64%), ji (64%), eo (70%)
+  - Characteristics: Simple structure, vertical vowels, silent initial consonants
+- **Best performers**: geos (99%), bak (96%), su (96%), iss (95%)
+  - Characteristics: Complex structure, final consonants, distinctive shapes
+
+---
+
+## Jamo-Based Hierarchical Classification
+
+We explored decomposing characters into jamo components and classifying each separately.
+
+### Isolated Jamo Recognition
+- **Dataset**: 2,400 individual jamo images
+- **Classifier**: KNN with k ∈ {3, 5, 7, 9}
+- **Results**:
+  - Initial consonants: **95.70% accuracy**
+  - Medial vowels: **90.87% accuracy**
+
+### Full Pipeline with Automatic Segmentation
+- **Challenge**: Requires automatic segmentation of complete characters into jamo regions
+- **Approach**: Rule-based horizontal/vertical splitting
+- **Results on 4,500 test samples**:
+  - Initial consonants: **17.60% accuracy** (↓ 78.1%p)
+  - Medial vowels: **10.42% accuracy** (↓ 80.5%p)
+  - Character-level: **2.51% accuracy** (vs. 84.65% baseline)
+
+### Root Cause
+**Segmentation bottleneck**: Hangul glyphs are spatially interleaved, exhibit layout variations, and form visually unified symbols. Rule-based heuristics fail to extract clean jamo regions, causing severe distribution mismatch between training (isolated jamos) and inference (segmented regions).
+
+**Key Insight**: Feature-label alignment is critical. Linguistic structure exploitation requires learnable decomposition (e.g., attention mechanisms), not rule-based segmentation.
+
+---
+
+## Comparison with Deep Learning
+
+| Approach | Model | Accuracy | Computational Cost |
+|----------|-------|----------|-------------------|
+| **Ours** | HOG + KNN | 84.65% | CPU-only, minutes |
+| **Baseline** | [Xception CNN](https://www.kaggle.com/code/stpeteishii/korean-character-lightning-xception) | 97.66% | GPU required, hours |
+
+**Performance Gap**: 13.01 percentage points
+
+**Trade-offs**:
+- Traditional ML: Lower accuracy, high interpretability, low computational cost
+- Deep Learning: Higher accuracy, limited interpretability, high computational cost
+
+---
 
 ## Requirements
 
-```
+```bash
+# Core dependencies
 numpy
-opencv-python (cv2)
+opencv-python
 scikit-image
 scikit-learn
-tqdm
 pandas
 matplotlib
 seaborn
+joblib
+jamo  # For Hangul jamo decomposition
+
+# Install via conda
+conda activate ml-env
+pip install -r requirements.txt
 ```
+
+---
 
 ## Usage
 
@@ -138,186 +184,87 @@ seaborn
 ```python
 from feature_extractor import extract_and_save_hog_per_class
 
-basic_root = "archive/Hangul Database/Hangul Database"
-extended_root = "archive/Hangul Database Extended/Hangul Database Extended"
-
-hog_params = {
-    "orientations": 9,
-    "pixels_per_cell": (8, 8),
-    "cells_per_block": (2, 2),
-    "block_norm": "L2-Hys",
-}
-
 extract_and_save_hog_per_class(
-    basic_root=basic_root,
-    extended_root=extended_root,
+    basic_root="archive/Hangul Database/Hangul Database",
+    extended_root="archive/Hangul Database Extended/Hangul Database Extended",
     output_root="features",
-    hog_params=hog_params,
+    hog_params={
+        "orientations": 9,
+        "pixels_per_cell": (8, 8),
+        "cells_per_block": (2, 2),
+        "block_norm": "L2-Hys",
+    }
 )
 ```
 
-### 2. Load Features and Train Models
+### 2. Train and Evaluate
 
-```python
-from dataloader import load_hog_features, _train_test_split
-from sklearn.decomposition import PCA
-from sklearn.neighbors import KNeighborsClassifier
+See `main.ipynb` for the complete training pipeline.
 
-# Load features
-feature_dir = "features/hog"
-X, y, class_names = load_hog_features(
-    feature_dir=feature_dir,
-    shuffle=True,
-    random_state=42
-)
+### 3. Run Error Analysis
 
-# Split data
-X_train, y_train, X_test, y_test = _train_test_split(
-    X, y,
-    train_ratio=0.8,
-    test_ratio=0.2,
-    random_state=42,
-    stratify=True
-)
+```bash
+# Confusion matrix and per-class accuracy
+python analysis.py
 
-# Apply PCA
-pca = PCA(n_components=256, random_state=42)
-X_train_pca = pca.fit_transform(X_train)
-X_test_pca = pca.transform(X_test)
+# Error case visualization
+python error_case_analysis.py
 
-# Train classifier
-knn = KNeighborsClassifier(n_neighbors=7)
-knn.fit(X_train_pca, y_train)
-
-# Evaluate
-accuracy = knn.score(X_test_pca, y_test)
-print(f"Test Accuracy: {accuracy:.4f}")
+# Jamo-level error decomposition
+python jamo_analysis.py
 ```
 
-### 3. Run Full Experiment
-
-Open and run `main.ipynb` in Jupyter Notebook or Google Colab for the complete training and evaluation pipeline.
-
-## Experimental Results
-
-### Model Performance Summary
-
-Based on experiments with **Extended Dataset** (134,400 samples):
-
-| Model | Best Parameters | Test Accuracy | Improvement from Basic |
-|-------|----------------|---------------|------------------------|
-| **K-Nearest Neighbors** | k=7 | **84.67%** | **+5.84%p** |
-| Logistic Regression | C=1.0 | (To be measured) | - |
-| Random Forest | n_estimators=75 | (To be measured) | - |
-
-### Key Achievement
-
-**HOG → PCA → ML Classifier** with Extended dataset achieves **84.67% accuracy**  
-without any deep learning, demonstrating that **data augmentation significantly improves traditional ML performance**.
-
-**Dataset Statistics**:
-- Training samples: 107,520
-- Test samples: 26,880
-- Original feature dimension: 1,764 (HOG)
-- Reduced dimension: 256 (PCA)
-
 ---
 
-## Baseline Comparison
+## Key Contributions
 
-We compare our traditional ML approach against a state-of-the-art deep learning baseline:
-
-| Item | Details |
-|------|---------|
-| **Model** | Xception CNN (Pretrained, PyTorch Lightning) |
-| **Reference** | [Korean Character Lightning Xception](https://www.kaggle.com/code/stpeteishii/korean-character-lightning-xception) |
-| **Test Accuracy** | **97.62%** |
-| **Key Features** | Data augmentation + GPU training + Transfer learning |
-
-### Research Goal
-
-Analyze the **advantages and limitations** of traditional ML approaches compared to deep learning baselines, and identify opportunities for hybrid approaches.
-
-### Performance Gap Analysis
-
-- **Traditional ML (Extended)**: 84.67%
-- **Deep Learning Baseline**: 97.62%
-- **Gap**: 12.95 percentage points
-- **Improvement with augmentation**: +5.84%p (78.83% → 84.67%)
-
-## Feature Visualization
-
-| Original Image | HOG Feature Map |
-|----------------|-----------------|
-| Korean handwritten character | Edge-enhanced representation |
-
-HOG features emphasize **contour information**, making the structure of Korean characters (consonants and vowels) distinctly visible and separable.
-
----
-
-## Key Insights
-
-| Observation | Insight |
-|-------------|---------|
-| **HOG feature quality** is crucial for character structure recognition | Feature engineering is more important than model complexity |
-| **PCA with 256 components** provides optimal trade-off | Dimensionality reduction without accuracy loss |
-| **KNN achieves highest performance** | Korean character structure is well-suited for nearest neighbor classification |
-| **Random Forest underperforms** | Tree-based models may struggle with high-dimensional visual features |
+1. **Reasonable accuracy (84.65%) with traditional ML** in resource-limited environments
+2. **Systematic error analysis**:
+   - Confusion matrix analysis
+   - Per-class performance breakdown
+   - Jamo-level error decomposition
+3. **Scientific analysis of negative results**:
+   - Jamo-based hierarchical classification failure
+   - Quantitative analysis of segmentation bottleneck (78-80%p degradation)
+   - Feature-label alignment insights
+4. **Comprehensive documentation** of methods, results, and failure modes
 
 ---
 
 ## Limitations & Future Work
 
 ### Current Limitations
+- **Performance ceiling**: 13%p gap vs. deep learning
+- **Hand-crafted features**: Limited ability to capture fine-grained variations (e.g., yeo vs. eo)
+- **Segmentation challenges**: Rule-based approaches fail for composite writing systems
 
-| Limitation | Improvement Plan |
-|------------|------------------|
-| Limited handwriting style diversity | Apply Kaggle Extended Dataset for more variations |
-| HOG feature constraints | Experiment with Feature Fusion (Gabor + LBP) |
-| 15% performance gap vs. deep learning | Explore hybrid models (CNN features → ML classifier) |
-| SVM overfitting issues | Re-tune kernel and margin parameters |
-
-### Next Steps
-
-- **Error Analysis**: Focus on confused classes (e.g., "ㅣ vs ㅓ", similar shapes)
-- **Data Augmentation**: Enhance with noise, rotation, stroke intensity variations
-- **Comparative Study**: Case-by-case performance comparison with Xception baseline
-- **Interpretability**: Use Grad-CAM to understand differences in Korean structure learning
-- **Hybrid Approach**: Combine CNN feature extraction with classical ML classifiers
-
----
-
-## Key Technical Features
-
-- **Modular Design**: Separate modules for feature extraction, data loading, and training  
-- **Resume Capability**: Feature extraction can resume from interruption  
-- **Multiple Classifiers**: Compare different ML algorithms  
-- **Hyperparameter Tuning**: Automated grid search with cross-validation  
-- **Visualization**: Performance comparison charts and ROC curves  
-- **Efficient Processing**: Batch processing with progress bars  
-
-
-## License
-
-This project is for **educational and academic research purposes only**.  
-Dataset license follows Kaggle original terms.
+### Future Directions
+1. **Hybrid approach**: Pre-trained CNN features + classical ML classifiers
+2. **Alternative features**: HOG + LBP + Gabor filter fusion
+3. **Jamo-aware learning**: Attention mechanisms or multi-task learning for implicit jamo decomposition
 
 ---
 
 ## Contributors
 
-**Team: Group 2**  
-**Course:** CSE36301 Machine Learning, UNIST  
-**Semester:** 2025 Fall
+**Team: Group 2**
 
-- [@geonhokim1](https://github.com/geonhokim1)
-- [@jiseungjeong](https://github.com/jiseungjeong)
-- Dahyun Kim
-- Caherin Hwang
+- Geonho Kim (20211021) - [@geonhokim1](https://github.com/geonhokim1)
+- Jiseung Jeong (20211301) - [@jiseungjeong](https://github.com/jiseungjeong)
+- Dahyun Kim (20221038)
+- Chaerin Hwang (20221422)
+
+**Course:** CSE36301 Machine Learning, UNIST, Fall 2025
+
+---
+
+## License
+
+This project is for **educational and academic research purposes only**.  
+Dataset follows original Kaggle license terms.
 
 ---
 
 ## Summary
 
-Traditional ML-based Korean OCR can achieve over 80% accuracy without deep learning. However, there's a clear performance improvement opportunity compared to deep learning baselines. Hybrid approaches combining classical feature engineering with modern deep learning may be the optimal strategy for future work.
-
+Traditional machine learning achieves **84.65% accuracy** on Hangul OCR without deep learning, demonstrating practical utility in resource-constrained environments. Comprehensive error analysis reveals that failures are structurally driven by visual similarities in jamo compositions. The attempted jamo-based hierarchical classification, despite achieving 95%+ accuracy on isolated jamos, failed catastrophically (2.51%) due to segmentation challenges, providing valuable insights into the fundamental limitations of rule-based approaches for composite writing systems. This work emphasizes the importance of understanding **why** methods succeed or fail, beyond simply reporting accuracy.
