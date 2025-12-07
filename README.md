@@ -1,21 +1,90 @@
 # Handwritten Korean Character Recognition using Traditional ML
 
-**CSE36301: Machine Learning — Final Project**  
-**UNIST, Fall 2025**  
-**Team: Group 2**
+**Team 2 - CSE36301 Machine Learning Final Project**  
+**UNIST, Fall 2025**
 
 ---
 
 ## Overview
 
-This project builds a **Hangul OCR system using traditional machine learning** instead of deep learning. We focus on achieving reasonable accuracy while maintaining interpretability and conducting systematic error analysis to understand why certain methods succeed or fail.
+This project implements a Hangul OCR system using traditional machine learning (HOG + KNN) and conducts systematic error analysis including jamo-level decomposition.
 
-### Key Achievements
-
+**Key Results**:
 - **84.65% accuracy** with HOG + PCA + KNN on 64 Hangul characters
-- **Comprehensive jamo-level error analysis** decomposing failures into initial/medial/final consonant patterns
-- **Scientific analysis of negative results** from hierarchical jamo-based classification (2.51% accuracy)
-- **Feature-label alignment insights** demonstrating fundamental limitations of rule-based segmentation
+- **Jamo-level error analysis** revealing balanced error distribution (37.3% / 36.2% / 26.6%)
+- **Hierarchical jamo classification experiment** demonstrating segmentation bottleneck (2.51% accuracy)
+- **Feature-label alignment insights** from negative results
+
+---
+
+## Quick Start
+
+### 1. Environment Setup
+
+```bash
+# Create conda environment
+conda create -n ml-env python=3.9
+conda activate ml-env
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Dataset
+
+Download the [Hangul Database Extended Dataset](https://www.kaggle.com/datasets/jkim289/handwritten-korean-characters) and extract to:
+
+```
+pdp_ocr/
+└── archive/
+    ├── Hangul Database/
+    │   └── Hangul Database/
+    └── Hangul Database Extended/
+        └── Hangul Database Extended/
+```
+
+### 3. Reproduction Steps
+
+#### Step 1: Feature Extraction (~30-60 min)
+```bash
+python feature_extractor.py
+```
+
+This creates `features/hog-extended/` directory with `.npy` files for each class.
+
+#### Step 2: Main Experiment (~10-15 min on Colab GPU)
+```bash
+# Upload main.ipynb to Google Colab
+# Run all cells
+```
+
+**Expected Output**:
+- Test Accuracy: ~84.65% (KNN with k=7)
+- Model checkpoints saved to `models/`
+- Results saved to `results/`
+
+#### Step 3: Error Analysis (~5 min)
+```bash
+python analysis.py
+python error_case_analysis.py
+python jamo_analysis.py
+```
+
+**Output**:
+- `results/confusion_matrix.png`
+- `results/per_class_accuracy.csv`
+- `results/error_cases/` (top 10 confused pairs)
+- `results/jamo_analysis/` (jamo error distribution)
+
+#### Step 4: Jamo-Based Hierarchical Classification (~20-30 min)
+```bash
+python jamo_classifier_train.py
+python jamo_full_pipeline.py
+```
+
+**Output**:
+- `models/jamo/` (trained jamo classifiers)
+- `results/jamo_full/jamo_full_results.csv`
 
 ---
 
@@ -23,27 +92,36 @@ This project builds a **Hangul OCR system using traditional machine learning** i
 
 ```
 pdp_ocr/
+├── config.py                      # Configuration (paths, parameters)
 ├── feature_extractor.py           # HOG feature extraction
-├── dataloader.py                  # Data loading and splitting
-├── config.py                      # Centralized configuration
-├── analysis.py                    # Confusion matrix and per-class analysis
-├── error_case_analysis.py         # Visualization of misclassified samples
-├── jamo_analysis.py               # Jamo-level error decomposition
-├── jamo_classifier_train.py       # Isolated jamo classifier training
-├── jamo_full_pipeline.py          # Complete jamo-based pipeline
-├── romanization_mapping.py        # Romanization to jamo mapping
-├── results/                       # All experimental results
+├── dataloader.py                  # Data loading utilities
+├── main.ipynb                     # Main training pipeline ★
+│
+├── analysis.py                    # Confusion matrix analysis ★
+├── error_case_analysis.py         # Error visualization
+├── jamo_analysis.py               # Jamo-level error decomposition ★
+│
+├── jamo_classifier_train.py       # Isolated jamo training
+├── jamo_char_segmentation.py      # Automatic segmentation
+├── jamo_full_pipeline.py          # Complete jamo pipeline ★
+├── romanization_mapping.py        # Romanization utilities
+│
+├── requirements.txt               # Python dependencies
+├── README.md                      # This file
+│
+├── results/                       # Experimental results
 │   ├── confusion_matrix.png
 │   ├── per_class_accuracy.csv
+│   ├── error_cases/
 │   ├── jamo_analysis/
 │   └── report_figures/
-├── models/                        # Trained models
-│   ├── pca.pkl
-│   ├── knn.pkl
-│   └── jamo/
-├── ANALYSIS_REPORT.md            # Detailed error analysis
-├── JAMO_ANALYSIS_REPORT.md       # Jamo-level error analysis
-└── JAMO_FULL_IMPLEMENTATION_REPORT.md  # Hierarchical classification results
+│
+└── models/                        # Trained models
+    ├── pca.pkl
+    ├── knn.pkl
+    └── jamo/
+
+★ = Core files for reproduction
 ```
 
 ---
