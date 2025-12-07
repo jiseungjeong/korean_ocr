@@ -45,14 +45,14 @@ pdp_ocr/
 
 ### 3. Reproduction Steps
 
-#### Step 1: Feature Extraction (~30-60 min)
+#### Step 1: Feature Extraction
 ```bash
 python feature_extractor.py
 ```
 
 This creates `features/hog-extended/` directory with `.npy` files for each class.
 
-#### Step 2: Main Experiment (~10-15 min on Colab GPU)
+#### Step 2: Main Experiment
 ```bash
 # Upload main.ipynb to Google Colab
 # Run all cells
@@ -63,7 +63,7 @@ This creates `features/hog-extended/` directory with `.npy` files for each class
 - Model checkpoints saved to `models/`
 - Results saved to `results/`
 
-#### Step 3: Error Analysis (~5 min)
+#### Step 3: Error Analysis
 ```bash
 python analysis.py
 python error_case_analysis.py
@@ -76,7 +76,7 @@ python jamo_analysis.py
 - `results/error_cases/` (top 10 confused pairs)
 - `results/jamo_analysis/` (jamo error distribution)
 
-#### Step 4: Jamo-Based Hierarchical Classification (~20-30 min)
+#### Step 4: Jamo-Based Hierarchical Classification
 ```bash
 python jamo_classifier_train.py
 python jamo_full_pipeline.py
@@ -156,7 +156,7 @@ pdp_ocr/
 - **K-Nearest Neighbors (KNN)**: k ∈ {3, 5, 7}
 - **Logistic Regression**: C ∈ {0.1, 1, 10}
 - **Random Forest**: estimators ∈ {25, 50, 75}
-- **SVM**: Excluded due to training time (>5 hours)
+- **SVM**: Excluded due to computational complexity
 
 ### 4. Hyperparameter Tuning
 - **GridSearchCV** with 3-fold cross-validation
@@ -223,8 +223,8 @@ We explored decomposing characters into jamo components and classifying each sep
 
 | Approach | Model | Accuracy | Computational Cost |
 |----------|-------|----------|-------------------|
-| **Ours** | HOG + KNN | 84.65% | CPU-only, minutes |
-| **Baseline** | [Xception CNN](https://www.kaggle.com/code/stpeteishii/korean-character-lightning-xception) | 97.66% | GPU required, hours |
+| **Ours** | HOG + KNN | 84.65% | CPU-only, Low |
+| **Baseline** | [Xception CNN](https://www.kaggle.com/code/stpeteishii/korean-character-lightning-xception) | 97.66% | GPU required, High |
 
 **Performance Gap**: 13.01 percentage points
 
